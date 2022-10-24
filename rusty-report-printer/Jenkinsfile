@@ -11,11 +11,11 @@ pipeline {
                 spec:
                     containers:
                         - name: rust
-                            image: rust:1.61-alpine3.15
-                            command: ["sleep", "infinity"]
+                        image: rust:1.61-alpine3.15
+                        command: ["sleep", "infinity"]
                         - name: node
-                            image: node:18.2.0-alpine3.15
-                            command: ["sleep", "infinity"]
+                        image: node:18.2.0-alpine3.15
+                        command: ["sleep", "infinity"]
             '''
 
         }
