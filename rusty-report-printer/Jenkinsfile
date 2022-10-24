@@ -6,18 +6,18 @@ import groovy.transform.Field
 pipeline {
     agent {
         kubernetes {
-            defaultContainer 'node'
+            defaultContainer 'rust'
             yaml '''
-              spec:
-                containers:
-                    - name: rusty
-                    image: rust:1.58.1
-                    command: ["sleep", "infinity"]
+                spec:
+                    containers:
+                    - name: rust
+                        image: rust:1.61-alpine3.15
+                        command: ["sleep", "infinity"]
                     - name: node
-                    image: node:18.11.0-alpine
-                    command: ["sleep", "infinity"]
-
+                        image: node:18.2.0-alpine3.15
+                        command: ["sleep", "infinity"]
             '''
+
         }
     }
 
@@ -29,7 +29,7 @@ pipeline {
 
     stages {
         stage('Generate Report') {
-            steps {
+            container('node') {
                 dir(PROJECT_DIR) {
                     sh './report_generator.js'
                 }
@@ -46,11 +46,9 @@ pipeline {
 //        }
 
         stage('Build') {
-            container('rusty') {
-                steps {
-                    dir(PROJECT_DIR) {
-                        sh 'cargo build --locked'
-                    }
+            steps {
+                dir(PROJECT_DIR) {
+                    sh 'cargo build --locked'
                 }
             }
         }
