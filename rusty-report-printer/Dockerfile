@@ -9,7 +9,7 @@ COPY ./Cargo* .
 COPY src ./src
 RUN cargo build --locked --release
 
-FROM alpine:3.15
+FROM node:18.2.0-alpine3.15
 
 WORKDIR /app
 
