@@ -48,7 +48,7 @@ pipeline {
     stages {
         stage('Generate Report') {
             steps {
-                container('node') {
+                container('node18') {
                     dir(PROJECT_DIR) {
                         sh './report_generator.js'
                     }
