@@ -1,4 +1,4 @@
-FROM rust:1.61-alpine3.15 as build
+FROM rustlang/rust:nightly-alpine as build
 
 ENV CARGO_UNSTABLE_SPARSE_REGISTRY=true
 
