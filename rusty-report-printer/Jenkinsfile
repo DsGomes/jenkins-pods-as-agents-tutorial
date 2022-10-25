@@ -31,7 +31,9 @@ pipeline {
         stage('Generate Report') {
             steps {
                 container('node') {
-                    sh './report_generator.js'
+                    dir(PROJECT_DIR) {
+                        sh './report_generator.js'
+                    }
                 }
             }
         }
@@ -47,7 +49,9 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'cargo build --locked'
+                dir(PROJECT_DIR) {
+                    sh 'cargo build --locked'
+                }
             }
         }
 
