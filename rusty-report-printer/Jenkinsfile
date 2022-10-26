@@ -6,6 +6,8 @@ import groovy.transform.Field
 pipeline {
     agent {
         kubernetes {
+            inheritFrom 'Node18Alpine Kaniko'
+            yamlMergeStrategy merge()
             defaultContainer 'rust'
             yaml '''
                 spec:
@@ -20,26 +22,6 @@ pipeline {
                             limits:
                                 cpu: 2
                                 memory: 256Mi
-                        - name: node18
-                          image: node:18.2.0-alpine3.15
-                          command: ["sleep", "infinity"]
-                          resources:
-                            requests:
-                                cpu: 100m
-                                memory: 128Mi
-                            limits:
-                                cpu: 2
-                                memory: 256Mi
-                        - name: kaniko
-                          image: gcr.io/kaniko-project/executor:v1.8.1-debug
-                          command: ["sleep", "infinity"]
-                          resources:
-                            requests:
-                                cpu: 100m
-                                memory: 512Mi
-                            limits:
-                                cpu: 2
-                                memory: 1Gi
             '''
 
         }
@@ -58,7 +40,7 @@ pipeline {
     stages {
         stage('Generate Report') {
             steps {
-                container('node18') {
+                container('Node18Alpine') {
                     dir(PROJECT_DIR) {
                         sh './report_generator.js'
                     }
@@ -87,16 +69,25 @@ pipeline {
         stage('Build Image') {
             steps {
                 dir(PROJECT_DIR) {
-                    container('kaniko') {
-                        sh '''/kaniko/executor --context=. \\
+                    container('Kaniko') {
+                        sh """/kaniko/executor --context=. \\
                             --dockerfile=./Dockerfile \\
-                            --destination=super-report-printer:v0.1.0 \\
-                            --use-new-run --snapshotMode=redo \\
+                            ${getKanikoDestinations()} \\
                             --no-push
-                        '''
+                        """
+
                     }
                 }
             }
         }
     }
+}
+
+def getKanikoDestinations() {
+    def commitTag = "${env.GIT_BRANCH.replace('/', '-')}-${env.GIT_COMMIT}"
+    def tags = [commitTag]
+    if (env.GIT_BRANCH == 'master') {
+        tags += 'latest'
+    }
+    return tags.collect { tag -> "--destination=rusty-report-printer:${tag}" }.join(' ')
 }
