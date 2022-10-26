@@ -1,5 +1,7 @@
 import groovy.transform.Field
 
+library 'jenkins-tutorial-shared-lib'
+
 // We need this because of the mono repo :(
 @Field String PROJECT_DIR = 'rusty-report-printer'
 
@@ -69,6 +71,14 @@ pipeline {
         stage('Build Image') {
             steps {
                 dir(PROJECT_DIR) {
+                    script {
+                        kaniko.buildNoPush(imageName: 'super-report-printer',
+                                           imageTag: getImageTags(),
+                                           context: PROJECT_DIR,
+                                           dockerfile: "${PROJECT_DIR}/Dockerfile"
+                                           )
+                    }
+
                     container('Kaniko') {
                         sh """/kaniko/executor --context=. \\
                             --dockerfile=./Dockerfile \\
